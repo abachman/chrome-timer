@@ -1,6 +1,6 @@
 {
 	"name": "Timer"
-  , "version": "0.1"
+  , "version": "1.0.2"
   , "manifest_version" : 2
   , "description": "A simple countown timer and alarm."
   , "background" : {
@@ -17,8 +17,6 @@
   , "permissions": [
     "notifications"
   ]
-  // Note: Because of bug 134315, you must declare any images you
-  // want to use with createNotification() as a web accessible resource.
   , "web_accessible_resources": [
     "icons/48.png"
   ]
