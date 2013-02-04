@@ -20,8 +20,8 @@ var TimerState = {
 }
 
 function sound_alarm() {
-  var ALARM = document.createElement('audio'),
-      soundUrl = chrome.extension.getURL("assets/airhorn.mp3");
+  var ALARM    = document.createElement('audio'),
+      soundUrl = chrome.extension.getURL("assets/wine-glass-alarm.ogg");
   ALARM.src = soundUrl;
   ALARM.load();
   ALARM.load();
