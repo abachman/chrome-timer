@@ -31,6 +31,7 @@ function clearBadge() {
 }
 
 function sound_alarm() {
+  // http://www.freesound.org/people/Traveler/sounds/13722/
   var ALARM    = document.createElement('audio'),
       soundUrl = chrome.extension.getURL("assets/wine-glass-alarm.ogg");
   ALARM.src = soundUrl;
