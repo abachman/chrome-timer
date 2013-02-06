@@ -45,6 +45,7 @@ var Display = function (masterTimer) {
   this.startButton = $('#start_button');
   this.resetButton = $('#reset_button');
   this.alarmCheck  = $('#alarm_check');
+  this.alarmButton = $('#alarm_button');
   this.master      = masterTimer;
   this.editable    = $('.editable');
 
@@ -87,8 +88,15 @@ Display.prototype.bindAll = function () {
   var self = this;
 
   // toggle alarm setting
-  this.alarmCheck.on('change', function () {
-    self.master.settings.soundAlarm = $(this).is(':checked');
+  this.alarmButton.on('click', function () {
+    // set checkbox to its opposite state
+    self.alarmCheck.prop('checked', !$(self.alarmCheck).is(':checked'));
+    self.master.settings.soundAlarm = self.alarmCheck.is(':checked');
+    if (self.alarmCheck.is(':checked')) {
+      self.alarmOn();
+    } else {
+      self.alarmOff();
+    }
   });
 
   // start / stop button
@@ -246,9 +254,15 @@ Display.prototype.pauseMode = function () {
     removeClass('disabled');
 }
 
-Display.prototype.alarmOn = function () { this.alarmCheck.prop('checked', true); }
+Display.prototype.alarmOn = function () {
+  this.alarmCheck.prop('checked', true);
+  this.alarmButton.addClass('active');
+}
 
-Display.prototype.alarmOff = function () { this.alarmCheck.prop('checked', false); }
+Display.prototype.alarmOff = function () {
+  this.alarmCheck.prop('checked', false);
+  this.alarmButton.removeClass('active');
+}
 
 Display.prototype.selectAll = function () {
   document.execCommand('selectAll',false,null);
