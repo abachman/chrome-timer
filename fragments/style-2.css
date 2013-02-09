@@ -32,11 +32,43 @@ time, mark, audio, video { margin: 0; padding: 0; border: 0; font-size: 100%; fo
 }
 
 #timer-container {
-  font-size: 90px;
   font-weight: bold;
-  padding: 10px;
+  font-size: 90px;
   color:   #414141;
+  padding: 10px;
   text-align: center;
+  position: relative;
+}
+
+#reset-preview {
+  font-size: 30px;
+  color: #000000;
+  opacity: 0;
+  -webkit-transition: opacity 0.1s linear;
+          transition: opacity 0.1s linear;
+}
+
+#reset-preview.hover {
+  opacity: 0.2;
+}
+
+#reset-preview span {
+  position: absolute;
+}
+
+#hours-reset {
+  top: 97px;
+  left: 50px;
+}
+
+#minutes-reset {
+  top: 97px;
+  left: 185px;
+}
+
+#seconds-reset {
+  top: 97px;
+  left: 320px;
 }
 
 #nav {
@@ -57,7 +89,7 @@ time, mark, audio, video { margin: 0; padding: 0; border: 0; font-size: 100%; fo
   font-size: 32px;
   font-weight: bold;
   position: absolute;
-  bottom: 10px;
+  bottom: 8px;
   right: 10px;
   cursor: default;
 }
@@ -139,9 +171,7 @@ time, mark, audio, video { margin: 0; padding: 0; border: 0; font-size: 100%; fo
   text-decoration: none;
   background-position: 0 -15px;
   -webkit-transition: background-position 0.1s linear;
-     -moz-transition: background-position 0.1s linear;
-       -o-transition: background-position 0.1s linear;
-          transition: background-position 0.1s linear;
+  transition: background-position 0.1s linear;
 }
 
 .btn:focus {
@@ -267,6 +297,37 @@ time, mark, audio, video { margin: 0; padding: 0; border: 0; font-size: 100%; fo
 .btn-inverse.active {
   background-color: #080808 \9;
 }
+
+.btn-link,
+.btn-link:active,
+.btn-link[disabled] {
+  background-color: transparent;
+  background-image: none;
+  -webkit-box-shadow: none;
+     -moz-box-shadow: none;
+          box-shadow: none;
+}
+
+.btn-link {
+  color: #0088cc;
+  cursor: pointer;
+  border-color: transparent;
+  -webkit-border-radius: 0;
+     -moz-border-radius: 0;
+          border-radius: 0;
+}
+
+.btn-link:hover {
+  color: #005580;
+  text-decoration: underline;
+  background-color: transparent;
+}
+
+.btn-link[disabled]:hover {
+  color: #333333;
+  text-decoration: none;
+}
+
 
 /****************************************** BTN GROUP *********************/
 
@@ -414,4 +475,8 @@ input[type="checkbox"][readonly] {
 
 .btn.active .icon-bell {
   opacity: 1.0;
+}
+
+#alarm_indicator {
+  color: #888;
 }

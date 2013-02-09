@@ -1,41 +1,3 @@
-var KEYS = {
-  ENTER:  13,
-  UP:     38,
-  DOWN:   40,
-  LEFT:   37,
-  RIGHT:  39,
-  ESCAPE: 27,
-  SPACE:  32,
-  CTRL:   17,
-  ALT:    18,
-  TAB:    9,
-  SHIFT:  16,
-  CAPS_LOCK: 20,
-  WINDOWS_KEY: 91,
-  WINDOWS_OPTION_KEY: 93,
-  BACKSPACE: 8,
-  HOME:      36,
-  END:       35,
-  INSERT:    45,
-  DELETE:    46,
-  PAGE_UP:   33,
-  PAGE_DOWN: 34,
-  NUMLOCK:   144,
-  F1:        112,
-  F2:        113,
-  F3:        114,
-  F4:        115,
-  F5:        116,
-  F6:        117,
-  F7:        118,
-  F8:        119,
-  F9:        120,
-  F10:       121,
-  F11:       122,
-  F12:       123,
-  SCROLL:    145,
-  PAUSE:     19
-}
 
 // connect to timer app in background process
 var bg    = chrome.extension.getBackgroundPage(),
@@ -44,10 +6,12 @@ var bg    = chrome.extension.getBackgroundPage(),
 var Display = function (masterTimer) {
   this.startButton = $('#start_button');
   this.resetButton = $('#reset_button');
+  this.resetPreview = $('#reset-preview');
   this.alarmCheck  = $('#alarm_check');
   this.alarmButton = $('#alarm_button');
-  this.master      = masterTimer;
-  this.editable    = $('.editable');
+  this.alarmIndicator = $('#alarm_indicator');
+  this.master = masterTimer;
+  this.editable = $('.editable');
 
   console.log('check master?', masterTimer);
 
@@ -55,14 +19,13 @@ var Display = function (masterTimer) {
 }
 
 Display.prototype.initialize = function () {
-  console.log('check master again?', this.master);
-
   this.setPrimaryTime(this.master.state.displayTime);
+  this.setResetTime(this.master.state.defaultDisplayTime);
 
   if (this.master.settings.soundAlarm) {
-    this.alarmOn();
+    this.alarmOn(true);
   } else {
-    this.alarmOff();
+    this.alarmOff(true);
   }
 
   // evaluate the state of the timer when the popup opens
@@ -93,9 +56,9 @@ Display.prototype.bindAll = function () {
     self.alarmCheck.prop('checked', !$(self.alarmCheck).is(':checked'));
     self.master.settings.soundAlarm = self.alarmCheck.is(':checked');
     if (self.alarmCheck.is(':checked')) {
-      self.alarmOn();
+      self.alarmOn(false);
     } else {
-      self.alarmOff();
+      self.alarmOff(false);
     }
   });
 
@@ -108,12 +71,28 @@ Display.prototype.bindAll = function () {
     }
   });
 
+  // reset button
   this.resetButton.on('click', function () {
     if (!self.master.isRunning()) {
       self.reset();
     }
   });
 
+  this.resetButton.on('mouseover', function () {
+    if (!$(this).is('.disabled') && (
+        $('#hours').text() != self.master.state.defaultDisplayTime.hours ||
+        $('#minutes').text() != self.master.state.defaultDisplayTime.minutes ||
+        $('#seconds').text() != self.master.state.defaultDisplayTime.seconds)) {
+      self.setResetTime(self.master.state.defaultDisplayTime);
+      self.resetPreview.addClass('hover');
+    }
+  });
+
+  this.resetButton.on('mouseout', function () {
+    self.resetPreview.removeClass('hover');
+  });
+
+  // editable field behaviors
   this.editable.
     blur(function () {
       // sanitize
@@ -128,7 +107,6 @@ Display.prototype.bindAll = function () {
         value = ((Number(value) < 10) ? '0' : '') + Number(value)
         $(this).text(value)
       }
-      self.makeStatic();
     }).
     click(function (evt) {
       evt.stopPropagation();
@@ -139,7 +117,10 @@ Display.prototype.bindAll = function () {
       if (!$(this).attr('contenteditable')) {
         self.makeEditable();
       }
+
       $(this).focus();
+
+      setTimeout(self.selectAll, 1);
     }).
     keydown(function (evt) {
       evt.stopPropagation();
@@ -152,12 +133,6 @@ Display.prototype.bindAll = function () {
       } else if (k === KEYS.SPACE) {
         evt.preventDefault()
       }
-  });
-
-  $('document, *').on('keydown', function (evt) {
-    if (evt.which == KEYS.TAB) {
-      evt.preventDefault();
-    }
   });
 
   var moveOnTab = function (next, prev) {
@@ -174,23 +149,26 @@ Display.prototype.bindAll = function () {
         } else {
           // forewards
           next.focus();
-          self.selectAll();
         }
 
+        self.deferredSelectAll();
       }
     }
   }
 
   // tab and shift-tab while editing time fields
-  $('#hours').on('keydown', moveOnTab($('#minutes'), $('#seconds')));
+  $('#hours').on(  'keydown', moveOnTab($('#minutes'), $('#seconds')));
   $('#minutes').on('keydown', moveOnTab($('#seconds'), $('#hours')));
   $('#seconds').on('keydown', moveOnTab($('#hours'), $('#minutes')));
 
   $('#main-popup').on('click', function () {
     $('.editable').blur();
+    self.makeStatic();
   });
 
   $(document).on('keyup', function (evt) {
+    console.log('document.keyup got ' + KEY_NAMES[evt.which]);
+
     if (evt.which == KEYS.SPACE) {
       if (self.master.isRunning()) {
         self.stop();
@@ -235,6 +213,12 @@ Display.prototype.setPrimaryTime = function (time) {
   $('#seconds').text(time.seconds);
 }
 
+Display.prototype.setResetTime = function (time) {
+  $('#hours-reset').text(time.hours);
+  $('#minutes-reset').text(time.minutes);
+  $('#seconds-reset').text(time.seconds);
+}
+
 Display.prototype.runningMode = function () {
   this.startButton.
     text('stop').
@@ -243,6 +227,8 @@ Display.prototype.runningMode = function () {
 
   this.resetButton.
     addClass('disabled');
+
+  this.makeStatic();
 }
 
 Display.prototype.pauseMode = function () {
@@ -254,18 +240,39 @@ Display.prototype.pauseMode = function () {
     removeClass('disabled');
 }
 
-Display.prototype.alarmOn = function () {
-  this.alarmCheck.prop('checked', true);
-  this.alarmButton.addClass('active');
+Display.prototype.changeAlarmStateAndFade = function (state) {
+  // this.alarmIndicator.find('.state').text(state);
+  // this.alarmIndicator.
+  //   show().
+  //   animate({opacity: 0}, 1000, function () {
+  //     $(this).hide();
+  //     $(this).css({opacity: 1});
+  //   });
 }
 
-Display.prototype.alarmOff = function () {
+Display.prototype.alarmOn = function (skipFade) {
+  this.alarmCheck.prop('checked', true);
+  this.alarmButton.addClass('active');
+  if (!skipFade) {
+    this.changeAlarmStateAndFade('on');
+  }
+}
+
+Display.prototype.alarmOff = function (skipFade) {
   this.alarmCheck.prop('checked', false);
   this.alarmButton.removeClass('active');
+
+  if (!skipFade) {
+    this.changeAlarmStateAndFade('off');
+  }
 }
 
 Display.prototype.selectAll = function () {
   document.execCommand('selectAll',false,null);
+}
+
+Display.prototype.deferredSelectAll = function () {
+  setTimeout(this.selectAll, 1);
 }
 
 ////
@@ -273,10 +280,6 @@ Display.prototype.selectAll = function () {
 ////
 
 var display = new Display(timer);
-
-$('.editable').on('click', function () {
-  display.selectAll();
-});
 
 // listen for the ticking of the clock while the popup is open
 chrome.extension.onMessage.addListener(function (message, sender, sendResponse) {
@@ -288,3 +291,4 @@ chrome.extension.onMessage.addListener(function (message, sender, sendResponse) 
 });
 
 $('.editable').blur();
+

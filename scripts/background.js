@@ -22,6 +22,11 @@ var TimerState = {
     hours: 0,
     minutes: 5,
     seconds: 0
+  },
+  defaultDisplayTime: {
+    hours: '00',
+    minutes: '05',
+    seconds: '00',
   }
 }
 
@@ -78,19 +83,22 @@ TimerApp.prototype.setTime = function (time) {
   // were updated and we should save the given values as the new default
   // time.
 
-  if (time.hours != this.state.time.hours ||
+  if (time.hours   != this.state.time.hours ||
       time.minutes != this.state.time.minutes ||
       time.seconds != this.state.time.seconds) {
     this.state.defaultTime = time;
+    this.state.defaultDisplayTime = this._getDisplayableTime(time);
   }
 
   this.state.time = time;
+  this.state.displayTime = this._getDisplayableTime(time);
+}
 
+TimerApp.prototype._getDisplayableTime = function (time) {
   var dh = (time.hours < 10 ? '0' : '') + String(time.hours),
       dm = (time.minutes < 10 ? '0' : '') + String(time.minutes),
       ds = (time.seconds < 10 ? '0' : '') + String(time.seconds)
-
-  this.state.displayTime = {
+  return {
     hours: dh,
     minutes: dm,
     seconds: ds

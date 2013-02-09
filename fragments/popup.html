@@ -6,7 +6,13 @@
 
 <div id='main-popup'>
   <div id='timer-container'>
-    <span id='hours' title='hours' class='editable'>00</span><span class='colon'>:</span><span id='minutes' title='minutes' class='editable'>00</span><span class='colon'>:</span><span id='seconds' title='seconds' class='editable'>00</span>
+    <span id='hours' title='hours' class='editable' tabindex='0'>00</span><span class='colon'>:</span><span id='minutes' title='minutes' class='editable' tabindex='1'>00</span><span class='colon'>:</span><span id='seconds' title='seconds' class='editable' tabindex='2'>00</span>
+
+    <div id='reset-preview'>
+      <span id='hours-reset'>00</span>
+      <span id='minutes-reset'>00</span>
+      <span id='seconds-reset'>00</span>
+    </div>
   </div>
 
   <div id='nav' class='form-inline'>
@@ -18,11 +24,16 @@
         <input type='checkbox' id='alarm_check' style='display:none' />
       </a>
     </div>
+
+    <span class='btn btn-link' id='alarm_indicator' style='display:none'>alarm <span class='state'>on</span></span>
   </div>
 
-  <!-- <div id='logo'>timer</div> -->
+  <div id='logo'>
+    timer
+  </div>
 </div>
 
 <script src='lib/jquery-1.8.3.min.js'></script>
+<script src='scripts/keys.js'> </script>
 <script src='scripts/load_timer.js'> </script>
 
