@@ -1,8 +1,8 @@
 {
 	"name": "Timer"
-  , "version": "1.0.4"
+  , "version": "1.0.5"
   , "manifest_version" : 2
-  , "description": "A simple countown timer and alarm."
+  , "description": "A clean, simple countown timer with visual and audible alarm."
   , "background" : {
 		"page" : "background.html"
 	}
