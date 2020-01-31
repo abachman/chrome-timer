@@ -75,7 +75,7 @@ var TimerApp = function () {
       chrome.browserAction.setBadgeText({text: " ! "})
       chrome.browserAction.setBadgeBackgroundColor({color: [255, 0, 0, 255]})
 
-      notify("Time's up!", "Timer has finished.")
+      notify("Time's up!", "Countdown timer has finished.")
 
       self.state.running = false
 
