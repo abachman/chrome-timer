@@ -1,39 +1,42 @@
 <!doctype html>
-<style>
-</style>
+<html>
+  <head>
+    <link rel='stylesheet' href='style.css' />
+  </head>
 
-<link rel='stylesheet' href='style.css' />
+  <body>
+    <div id='main-popup'>
+      <div id='timer-container'>
+        <span id='hours' title='hours' class='digit editable' tabindex='0'>00</span><span class='colon'>:</span><span id='minutes' title='minutes' class='digit editable' tabindex='1'>00</span><span class='colon'>:</span><span id='seconds' title='seconds' class='digit editable' tabindex='2'>00</span>
 
-<div id='main-popup'>
-  <div id='timer-container'>
-    <span id='hours' title='hours' class='digit editable' tabindex='0'>00</span><span class='colon'>:</span><span id='minutes' title='minutes' class='digit editable' tabindex='1'>00</span><span class='colon'>:</span><span id='seconds' title='seconds' class='digit editable' tabindex='2'>00</span>
+        <div id='reset-preview'>
+          <span id='hours-reset'>00</span>
+          <span id='minutes-reset'>00</span>
+          <span id='seconds-reset'>00</span>
+        </div>
+      </div>
 
-    <div id='reset-preview'>
-      <span id='hours-reset'>00</span>
-      <span id='minutes-reset'>00</span>
-      <span id='seconds-reset'>00</span>
+      <div id='nav' class='form-inline'>
+        <div class='btn-group'>
+          <a class='btn btn-success' id='start_button'>start</a>
+          <a class='btn' id='reset_button'>reset</a>
+          <a class='btn active' id='alarm_button' title='play an audible alarm'>
+            <i class='icon-bell'></i>
+            <input type='checkbox' id='alarm_check' style='display:none' />
+          </a>
+        </div>
+
+        <span class='btn btn-link' id='alarm_indicator' style='display:none'>alarm <span class='state'>on</span></span>
+      </div>
+
+      <div id='logo'>
+        timer
+      </div>
     </div>
-  </div>
 
-  <div id='nav' class='form-inline'>
-    <div class='btn-group'>
-      <a class='btn btn-success' id='start_button'>start</a>
-      <a class='btn' id='reset_button'>reset</a>
-      <a class='btn active' id='alarm_button' title='play an audible alarm'>
-        <i class='icon-bell'></i>
-        <input type='checkbox' id='alarm_check' style='display:none' />
-      </a>
-    </div>
-
-    <span class='btn btn-link' id='alarm_indicator' style='display:none'>alarm <span class='state'>on</span></span>
-  </div>
-
-  <div id='logo'>
-    timer
-  </div>
-</div>
-
-<script src='lib/jquery-1.8.3.min.js'></script>
-<script src='scripts/keys.js'> </script>
-<script src='scripts/load_timer.js'> </script>
+    <script src='lib/jquery-1.8.3.min.js'></script>
+    <script src='scripts/keys.js'> </script>
+    <script src='scripts/load_timer.js'> </script>
+  </body>
+</html>
 

@@ -1,4 +1,3 @@
-
 // connect to timer app in background process
 var bg    = chrome.extension.getBackgroundPage(),
     timer = bg.app;
@@ -97,7 +96,7 @@ Display.prototype.bindAll = function () {
     blur(function () {
       // sanitize
       var value = $(this).text()
-      if (value.length == 0 || Number(value) == 0) {
+      if (value.length === 0 || Number(value) === 0) {
         $(this).text('00')
       } else if (!/^[0-9]{1,2}$/.test(value)) {
         value = value.replace(/[^0-9]/,'').substr(0,2)
