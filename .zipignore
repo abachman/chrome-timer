@@ -8,4 +8,7 @@ chrome-timer/Makefile
 chrome-timer/package.json
 chrome-timer/package-lock.json
 chrome-timer/README.md
+chrome-timer/mise.toml
+chrome-timer/mise.local.toml
+
 

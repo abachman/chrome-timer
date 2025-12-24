@@ -2,25 +2,27 @@
   "name": "chrome-timer",
   "version": "1.0.0",
   "description": "A complete Chrome plugin that runs entirely in the background.",
-  "main": "index.js",
+  "author": "Adam Bachman https://github.com/abachman",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abachman/chrome-timer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/abachman/chrome-timer/issues"
+  },
+  "homepage": "https://github.com/abachman/chrome-timer#readme",
   "directories": {
     "lib": "lib"
+  },
+  "env": {
+		"browser": true
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/abachman/chrome-timer.git"
-  },
-  "author": "Adam Bachman https://github.com/abachman",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/abachman/chrome-timer/issues"
-  },
-  "homepage": "https://github.com/abachman/chrome-timer#readme",
   "devDependencies": {
     "eslint": "^9.39.2",
     "eslint-config-standard-flat": "^17.1.0",

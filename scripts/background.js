@@ -1,11 +1,10 @@
-// initially this is a no-op. Pop resets it to a callback when it loads.
-var popupCallback = function () {}
+/* global chrome, Audio */
 
-var Settings = {
+const Settings = {
   soundAlarm: true
 }
 
-var TimerState = {
+const TimerState = {
   running: false,
   time: {
     hours: 0,
@@ -15,7 +14,7 @@ var TimerState = {
   displayTime: {
     hours: '00',
     minutes: '05',
-    seconds: '00',
+    seconds: '00'
   },
   // initial default time
   defaultTime: {
@@ -26,44 +25,44 @@ var TimerState = {
   defaultDisplayTime: {
     hours: '00',
     minutes: '05',
-    seconds: '00',
+    seconds: '00'
   }
 }
 
-var clearBadge = function () {
-  chrome.browserAction.setBadgeText({text: ""})
-  chrome.browserAction.setBadgeBackgroundColor({color: [255, 255, 255, 0]})
+const clearBadge = function () {
+  chrome.browserAction.setBadgeText({ text: '' })
+  chrome.browserAction.setBadgeBackgroundColor({ color: [255, 255, 255, 0] })
 }
 
-var soundAlarm = function () {
+const soundAlarm = function () {
   // http://www.freesound.org/people/Traveler/sounds/13722/
   // https://stackoverflow.com/questions/27496465/how-can-i-play-sound-in-a-chrome-extension
-  var alarm = new Audio(chrome.runtime.getURL("assets/wine-glass-alarm.ogg"))
+  const alarm = new Audio(chrome.runtime.getURL('assets/wine-glass-alarm.ogg'))
   alarm.play()
 }
 
-var notify = function (title, message) {
+const notify = function (title, message) {
   try {
-    var options = {
+    const options = {
       type: 'basic',
       iconUrl: chrome.extension.getURL('icons/48.png'),
-      title: title,
-      message: message
+      title,
+      message
     }
     console.log('notification with options', options)
     chrome.notifications.create(
       options,
       function (notificationId) {
-        console.log("displayed notification", notificationId)
+        console.log('displayed notification', notificationId)
       }
     )
   } catch (ex) {
-    console.error("ERROR showing notification", ex)
+    console.error('ERROR showing notification', ex)
   }
 }
 
-var TimerApp = function () {
-  var self = this
+const TimerApp = function () {
+  const self = this
   this.state = TimerState
   this.settings = Settings
   this.clock = new Clock({
@@ -72,14 +71,14 @@ var TimerApp = function () {
       self.update(clock)
     },
     finish: function (clock) {
-      chrome.browserAction.setBadgeText({text: " ! "})
-      chrome.browserAction.setBadgeBackgroundColor({color: [255, 0, 0, 255]})
+      chrome.browserAction.setBadgeText({ text: ' ! ' })
+      chrome.browserAction.setBadgeBackgroundColor({ color: [255, 0, 0, 255] })
 
-      notify("Time's up!", "Countdown timer has finished.")
+      notify("Time's up!", 'Countdown timer has finished.')
 
       self.state.running = false
 
-      console.log("[chrome-timer] ding at ", new Date())
+      console.log('[chrome-timer] ding at ', new Date())
 
       if (self.settings.soundAlarm) {
         soundAlarm()
@@ -98,9 +97,9 @@ TimerApp.prototype.setTime = function (time) {
   // were updated and we should save the given values as the new default
   // time.
 
-  if (time.hours   != this.state.time.hours ||
-      time.minutes != this.state.time.minutes ||
-      time.seconds != this.state.time.seconds) {
+  if (time.hours !== this.state.time.hours ||
+      time.minutes !== this.state.time.minutes ||
+      time.seconds !== this.state.time.seconds) {
     this.state.defaultTime = time
     this.state.defaultDisplayTime = this._getDisplayableTime(time)
   }
@@ -110,9 +109,9 @@ TimerApp.prototype.setTime = function (time) {
 }
 
 TimerApp.prototype._getDisplayableTime = function (time) {
-  var dh = (time.hours < 10 ? '0' : '') + String(time.hours),
-      dm = (time.minutes < 10 ? '0' : '') + String(time.minutes),
-      ds = (time.seconds < 10 ? '0' : '') + String(time.seconds)
+  const dh = (time.hours < 10 ? '0' : '') + String(time.hours)
+  const dm = (time.minutes < 10 ? '0' : '') + String(time.minutes)
+  const ds = (time.seconds < 10 ? '0' : '') + String(time.seconds)
   return {
     hours: dh,
     minutes: dm,
@@ -136,8 +135,8 @@ TimerApp.prototype.update = function (time) {
   this.setTime(time)
 
   if (this.state.time.hours <= 0 && this.state.time.minutes <= 0) {
-    chrome.browserAction.setBadgeBackgroundColor({color: [51, 51, 51, 255]})
-    chrome.browserAction.setBadgeText({text: this.state.time.minutes + ":" + this.state.displayTime.seconds})
+    chrome.browserAction.setBadgeBackgroundColor({ color: [51, 51, 51, 255] })
+    chrome.browserAction.setBadgeText({ text: this.state.time.minutes + ':' + this.state.displayTime.seconds })
   }
 
   // send time update message
@@ -151,4 +150,4 @@ TimerApp.prototype.isRunning = function () {
   return this.state.running
 }
 
-var app = new TimerApp()
+window.app = new TimerApp()
