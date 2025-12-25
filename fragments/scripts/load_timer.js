@@ -1,36 +1,59 @@
 /* global chrome, $, KEYS, KEY_NAMES */
-// connect to timer app in background process
-const bg = chrome.extension.getBackgroundPage()
-const timer = bg.app
 
-const Display = function (masterTimer) {
+// Timer state from service worker
+let timerState = null
+
+// Send message to service worker and get response
+async function sendMessage (message) {
+  return new Promise((resolve) => {
+    chrome.runtime.sendMessage(message, (response) => {
+      if (chrome.runtime.lastError) {
+        console.error('Message error:', chrome.runtime.lastError)
+        resolve(null)
+      } else {
+        resolve(response)
+      }
+    })
+  })
+}
+
+// Get current timer state from service worker
+async function getState () {
+  const response = await sendMessage({ action: 'getState' })
+  if (response && response.state) {
+    timerState = response.state
+  }
+}
+
+const Display = function () {
   this.startButton = $('#start_button')
   this.resetButton = $('#reset_button')
   this.resetPreview = $('#reset-preview')
   this.alarmCheck = $('#alarm_check')
   this.alarmButton = $('#alarm_button')
   this.alarmIndicator = $('#alarm_indicator')
-  this.master = masterTimer
-  this.editable = $('.editable')
 
-  console.log('check master?', masterTimer)
+  console.log('check state?', timerState)
 
   this.initialize()
 }
 
-Display.prototype.initialize = function () {
-  this.setPrimaryTime(this.master.state.displayTime)
-  this.setResetTime(this.master.state.defaultDisplayTime)
+Display.prototype.initialize = async function () {
+  // Get initial state from service worker
+  await getState()
 
-  if (this.master.settings.soundAlarm) {
+  this.setPrimaryTime(timerState.displayTime)
+  this.setResetTime(timerState.defaultDisplayTime)
+
+  if (timerState.settings.soundAlarm) {
     this.alarmOn(true)
   } else {
     this.alarmOff(true)
   }
 
   // evaluate the state of the timer when the popup opens
-  if (!this.master.isRunning()) {
-    bg.clearBadge()
+  if (timerState.status !== 'running') {
+    this.clearBadge()
     this.pauseMode()
   } else {
     this.runningMode()
@@ -54,7 +77,10 @@ Display.prototype.bindAll = function () {
   this.alarmButton.on('click', function () {
     // set checkbox to its opposite state
     self.alarmCheck.prop('checked', !$(self.alarmCheck).is(':checked'))
-    self.master.settings.soundAlarm = self.alarmCheck.is(':checked')
+    const enabled = self.alarmCheck.is(':checked')
+    // Update state and send to service worker
+    timerState.settings.soundAlarm = enabled
+    sendMessage({ action: 'toggleAlarm', enabled })
     if (self.alarmCheck.is(':checked')) {
       self.alarmOn(false)
     } else {
@@ -64,7 +90,7 @@ Display.prototype.bindAll = function () {
 
   // start / stop button
   this.startButton.on('click', function () {
-    if (!self.master.isRunning()) {
+    if (timerState.status !== 'running') {
       self.start()
     } else {
       self.stop()
@@ -73,17 +99,17 @@ Display.prototype.bindAll = function () {
 
   // reset button
   this.resetButton.on('click', function () {
-    if (!self.master.isRunning()) {
+    if (timerState.status !== 'running') {
       self.reset()
     }
   })
 
   this.resetButton.on('mouseover', function () {
     if (!$(this).is('.disabled') && (
-      $('#hours').text() !== self.master.state.defaultDisplayTime.hours ||
-        $('#minutes').text() !== self.master.state.defaultDisplayTime.minutes ||
-        $('#seconds').text() !== self.master.state.defaultDisplayTime.seconds)) {
-      self.setResetTime(self.master.state.defaultDisplayTime)
+      $('#hours').text() !== timerState.defaultDisplayTime.hours ||
+        $('#minutes').text() !== timerState.defaultDisplayTime.minutes ||
+        $('#seconds').text() !== timerState.defaultDisplayTime.seconds)) {
+      self.setResetTime(timerState.defaultDisplayTime)
       self.resetPreview.addClass('hover')
     }
   })
@@ -93,6 +119,8 @@ Display.prototype.bindAll = function () {
   })
 
   // editable field behaviors
+  this.editable = $('.editable')
+
   this.editable
     .blur(function () {
       // sanitize
@@ -112,7 +140,7 @@ Display.prototype.bindAll = function () {
       evt.stopPropagation()
 
       // ignore clicks while timer is active
-      if (self.master.isRunning()) return
+      if (timerState.status === 'running') return
 
       if (!$(this).attr('contenteditable')) {
         self.makeEditable()
@@ -170,7 +198,7 @@ Display.prototype.bindAll = function () {
     console.log('document.keyup got ' + KEY_NAMES[evt.which])
 
     if (evt.which === KEYS.SPACE) {
-      if (self.master.isRunning()) {
+      if (timerState.status === 'running') {
         self.stop()
       } else {
         self.start()
@@ -187,24 +215,34 @@ Display.prototype.start = function () {
   if (hours + minutes + seconds > 0) {
     this.runningMode()
 
-    // set master timer and start counting down
-    this.master.setTime({
-      hours,
-      minutes,
-      seconds
+    // Send start command to service worker
+    sendMessage({
+      action: 'start',
+      time: {
+        hours,
+        minutes,
+        seconds
+      }
     })
 
-    this.master.start()
+    // Update local state
+    timerState.status = 'running'
   }
 }
 
 Display.prototype.reset = function () {
-  this.master.reset()
+  sendMessage({ action: 'reset' })
+  // Update local state
+  timerState.time = { ...timerState.defaultTime }
+  timerState.displayTime = { ...timerState.defaultDisplayTime }
+  timerState.status = 'stopped'
 }
 
 Display.prototype.stop = function () {
   this.pauseMode()
-  this.master.stop()
+  sendMessage({ action: 'stop' })
+  // Update local state
+  timerState.status = 'stopped'
 }
 
 Display.prototype.setPrimaryTime = function (time) {
@@ -275,18 +313,22 @@ Display.prototype.deferredSelectAll = function () {
   setTimeout(this.selectAll, 1)
 }
 
+Display.prototype.clearBadge = function () {
+  sendMessage({ action: 'clearBadge' })
+}
+
 /// /
 /// / ON LOAD
 /// /
 
-const display = new Display(timer)
+const display = new Display()
 
-// listen for the ticking of the clock while the popup is open
-chrome.extension.onMessage.addListener(function (message, sender, sendResponse) {
-  if (message.type == 'second') {
+// listen for messages from service worker
+chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+  if (message.type === 'tick') {
     display.setPrimaryTime(message.time)
-  } else if (message.type == 'finish') {
-    display.pauseMode()
+  } else if (message.type === 'stateUpdate') {
+    timerState = message.state
   }
 })
 

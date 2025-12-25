@@ -6,10 +6,11 @@
   "description": "A clean, simple countown timer with visual and audible alarm.",
 
   "background": {
-    "page": "background.html"
+    "service_worker": "service_worker.js",
+    "type": "module"
   },
 
-  "browser_action": {
+  "action": {
     "default_icon": {
       "19": "icons/19.png",
       "38": "icons/38.png"
@@ -18,7 +19,8 @@
     "default_popup": "fragments/popup.html"
   },
 
-  "permissions": ["notifications"],
+  "permissions": ["notifications", "alarms", "storage"],
+  "host_permissions": [],
   "web_accessible_resources": [
     {
       "resources": [
