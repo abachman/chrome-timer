@@ -21,12 +21,11 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix && prettier --write ."
   },
   "devDependencies": {
     "eslint": "^9.39.2",
-    "eslint-config-standard-flat": "^17.1.0",
-    "eslint-plugin-promise": "^7.2.1",
-    "eslint-plugin-standard": "^5.0.0"
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.4.2"
   }
 }

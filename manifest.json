@@ -19,7 +19,7 @@
     "default_popup": "fragments/popup.html"
   },
 
-  "permissions": ["notifications", "alarms", "storage"],
+  "permissions": ["notifications", "alarms", "storage", "offscreen"],
   "host_permissions": [],
   "web_accessible_resources": [
     {

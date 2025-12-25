@@ -1,13 +1,24 @@
-const standardFlatConfig = require('eslint-config-standard-flat')
 const { defineConfig, globalIgnores } = require('eslint/config')
 
 module.exports = defineConfig([
-  standardFlatConfig.default,
+  globalIgnores(['./**/jquery-1.8.3.min.js']),
   {
     languageOptions: {
       ecmaVersion: 'latest',
-      sourceType: 'module'
+      sourceType: 'module',
+      globals: {
+        chrome: 'readonly',
+        chromeRuntimeGetContexts: 'readonly'
+      }
+    },
+    rules: {
+      'no-unused-vars': ['warn', { args: 'none', caughtErrors: 'none', ignoreRestSiblings: true }],
+      'no-constant-condition': ['error', { checkLoops: false }],
+      'no-console': 'off'
     }
   },
-  globalIgnores(['./**/jquery-1.8.3.min.js'])
+  {
+    // Turn off all rules that are unnecessary or might conflict with Prettier
+    ...require('eslint-config-prettier')
+  }
 ])
