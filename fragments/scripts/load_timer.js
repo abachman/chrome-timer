@@ -4,11 +4,11 @@
 let timerState = null
 
 // Send message to service worker and get response
-async function sendMessage (message) {
+async function sendMessage(message) {
   return new Promise((resolve) => {
     chrome.runtime.sendMessage(message, (response) => {
       if (chrome.runtime.lastError) {
-        console.error('Message error:', chrome.runtime.lastError)
+        console.error("Message error:", chrome.runtime.lastError)
         resolve(null)
       } else {
         resolve(response)
@@ -18,22 +18,22 @@ async function sendMessage (message) {
 }
 
 // Get current timer state from service worker
-async function getState () {
-  const response = await sendMessage({ action: 'getState' })
+async function getState() {
+  const response = await sendMessage({ action: "getState" })
   if (response && response.state) {
     timerState = response.state
   }
 }
 
 const Display = function () {
-  this.startButton = $('#start_button')
-  this.resetButton = $('#reset_button')
-  this.resetPreview = $('#reset-preview')
-  this.alarmCheck = $('#alarm_check')
-  this.alarmButton = $('#alarm_button')
-  this.alarmIndicator = $('#alarm_indicator')
+  this.startButton = $("#start_button")
+  this.resetButton = $("#reset_button")
+  this.resetPreview = $("#reset-preview")
+  this.alarmCheck = $("#alarm_check")
+  this.alarmButton = $("#alarm_button")
+  this.alarmIndicator = $("#alarm_indicator")
 
-  console.log('check state?', timerState)
+  console.log("check state?", timerState)
 
   this.initialize()
 }
@@ -52,7 +52,7 @@ Display.prototype.initialize = async function () {
   }
 
   // evaluate the state of the timer when the popup opens
-  if (timerState.status !== 'running') {
+  if (timerState.status !== "running") {
     this.clearBadge()
     this.pauseMode()
   } else {
@@ -63,36 +63,36 @@ Display.prototype.initialize = async function () {
 }
 
 Display.prototype.makeEditable = function () {
-  this.editable.attr('contenteditable', 'true')
+  this.editable.attr("contenteditable", "true")
 }
 
 Display.prototype.makeStatic = function () {
-  this.editable.attr('contenteditable', null)
+  this.editable.attr("contenteditable", null)
 }
 
 Display.prototype.bindAll = function () {
   const self = this
 
   // toggle alarm setting
-  this.alarmButton.on('click', function () {
+  this.alarmButton.on("click", function () {
     // set checkbox to its opposite state
-    self.alarmCheck.prop('checked', !$(self.alarmCheck).is(':checked'))
-    const enabled = self.alarmCheck.is(':checked')
+    self.alarmCheck.prop("checked", !$(self.alarmCheck).is(":checked"))
+    const enabled = self.alarmCheck.is(":checked")
     // Update state and send to service worker
     timerState.settings.soundAlarm = enabled
-    sendMessage({ action: 'toggleAlarm', enabled })
-    if (self.alarmCheck.is(':checked')) {
+    sendMessage({ action: "toggleAlarm", enabled })
+    if (self.alarmCheck.is(":checked")) {
       self.alarmOn(false)
       // Play test sound when enabling alarm
-      sendMessage({ action: 'testAlarm' })
+      sendMessage({ action: "testAlarm" })
     } else {
       self.alarmOff(false)
     }
   })
 
   // start / stop button
-  this.startButton.on('click', function () {
-    if (timerState.status !== 'running') {
+  this.startButton.on("click", function () {
+    if (timerState.status !== "running") {
       self.start()
     } else {
       self.stop()
@@ -100,41 +100,43 @@ Display.prototype.bindAll = function () {
   })
 
   // reset button
-  this.resetButton.on('click', function () {
-    if (timerState.status !== 'running') {
+  this.resetButton.on("click", function () {
+    if (timerState.status !== "running") {
       self.reset()
     }
   })
 
-  this.resetButton.on('mouseover', function () {
-    if (!$(this).is('.disabled') && (
-      $('#hours').text() !== timerState.defaultDisplayTime.hours ||
-        $('#minutes').text() !== timerState.defaultDisplayTime.minutes ||
-        $('#seconds').text() !== timerState.defaultDisplayTime.seconds)) {
+  this.resetButton.on("mouseover", function () {
+    if (
+      !$(this).is(".disabled") &&
+      ($("#hours").text() !== timerState.defaultDisplayTime.hours ||
+        $("#minutes").text() !== timerState.defaultDisplayTime.minutes ||
+        $("#seconds").text() !== timerState.defaultDisplayTime.seconds)
+    ) {
       self.setResetTime(timerState.defaultDisplayTime)
-      self.resetPreview.addClass('hover')
+      self.resetPreview.addClass("hover")
     }
   })
 
-  this.resetButton.on('mouseout', function () {
-    self.resetPreview.removeClass('hover')
+  this.resetButton.on("mouseout", function () {
+    self.resetPreview.removeClass("hover")
   })
 
   // editable field behaviors
-  this.editable = $('.editable')
+  this.editable = $(".editable")
 
   this.editable
     .blur(function () {
       // sanitize
       let value = $(this).text()
       if (value.length === 0 || Number(value) === 0) {
-        $(this).text('00')
+        $(this).text("00")
       } else if (!/^[0-9]{1,2}$/.test(value)) {
-        value = value.replace(/[^0-9]/, '').substr(0, 2)
+        value = value.replace(/[^0-9]/, "").substr(0, 2)
         $(this).text(value)
       } else {
         // prepend single digit numbers with a zero
-        value = ((Number(value) < 10) ? '0' : '') + Number(value)
+        value = (Number(value) < 10 ? "0" : "") + Number(value)
         $(this).text(value)
       }
     })
@@ -142,9 +144,9 @@ Display.prototype.bindAll = function () {
       evt.stopPropagation()
 
       // ignore clicks while timer is active
-      if (timerState.status === 'running') return
+      if (timerState.status === "running") return
 
-      if (!$(this).attr('contenteditable')) {
+      if (!$(this).attr("contenteditable")) {
         self.makeEditable()
       }
 
@@ -187,20 +189,20 @@ Display.prototype.bindAll = function () {
   }
 
   // tab and shift-tab while editing time fields
-  $('#hours').on('keydown', moveOnTab($('#minutes'), $('#seconds')))
-  $('#minutes').on('keydown', moveOnTab($('#seconds'), $('#hours')))
-  $('#seconds').on('keydown', moveOnTab($('#hours'), $('#minutes')))
+  $("#hours").on("keydown", moveOnTab($("#minutes"), $("#seconds")))
+  $("#minutes").on("keydown", moveOnTab($("#seconds"), $("#hours")))
+  $("#seconds").on("keydown", moveOnTab($("#hours"), $("#minutes")))
 
-  $('#main-popup').on('click', function () {
-    $('.editable').blur()
+  $("#main-popup").on("click", function () {
+    $(".editable").blur()
     self.makeStatic()
   })
 
-  $(document).on('keyup', function (evt) {
-    console.log('document.keyup got ' + KEY_NAMES[evt.which])
+  $(document).on("keyup", function (evt) {
+    console.log("document.keyup got " + KEY_NAMES[evt.which])
 
     if (evt.which === KEYS.SPACE) {
-      if (timerState.status === 'running') {
+      if (timerState.status === "running") {
         self.stop()
       } else {
         self.start()
@@ -210,74 +212,67 @@ Display.prototype.bindAll = function () {
 }
 
 Display.prototype.start = function () {
-  const hours = Number($('#hours').text())
-  const minutes = Number($('#minutes').text())
-  const seconds = Number($('#seconds').text())
+  const hours = Number($("#hours").text())
+  const minutes = Number($("#minutes").text())
+  const seconds = Number($("#seconds").text())
 
   if (hours + minutes + seconds > 0) {
     this.runningMode()
 
     // Send start command to service worker
     sendMessage({
-      action: 'start',
+      action: "start",
       time: {
         hours,
         minutes,
-        seconds
-      }
+        seconds,
+      },
     })
 
     // Update local state
-    timerState.status = 'running'
+    timerState.status = "running"
   }
 }
 
 Display.prototype.reset = function () {
-  sendMessage({ action: 'reset' })
+  sendMessage({ action: "reset" })
   // Update local state
   timerState.time = { ...timerState.defaultTime }
   timerState.displayTime = { ...timerState.defaultDisplayTime }
-  timerState.status = 'stopped'
+  timerState.status = "stopped"
 }
 
 Display.prototype.stop = function () {
   this.pauseMode()
-  sendMessage({ action: 'stop' })
+  sendMessage({ action: "stop" })
   // Update local state
-  timerState.status = 'stopped'
+  timerState.status = "stopped"
 }
 
 Display.prototype.setPrimaryTime = function (time) {
-  $('#hours').text(time.hours)
-  $('#minutes').text(time.minutes)
-  $('#seconds').text(time.seconds)
+  $("#hours").text(time.hours)
+  $("#minutes").text(time.minutes)
+  $("#seconds").text(time.seconds)
 }
 
 Display.prototype.setResetTime = function (time) {
-  $('#hours-reset').text(time.hours)
-  $('#minutes-reset').text(time.minutes)
-  $('#seconds-reset').text(time.seconds)
+  $("#hours-reset").text(time.hours)
+  $("#minutes-reset").text(time.minutes)
+  $("#seconds-reset").text(time.seconds)
 }
 
 Display.prototype.runningMode = function () {
-  this.startButton
-    .text('stop')
-    .addClass('btn-danger')
-    .removeClass('btn-success')
+  this.startButton.text("stop").addClass("btn-danger").removeClass("btn-success")
 
-  this.resetButton
-    .addClass('disabled')
+  this.resetButton.addClass("disabled")
 
   this.makeStatic()
 }
 
 Display.prototype.pauseMode = function () {
-  this.startButton.text('start')
-    .removeClass('btn-danger')
-    .addClass('btn-success')
+  this.startButton.text("start").removeClass("btn-danger").addClass("btn-success")
 
-  this.resetButton
-    .removeClass('disabled')
+  this.resetButton.removeClass("disabled")
 }
 
 Display.prototype.changeAlarmStateAndFade = function (state) {
@@ -291,24 +286,24 @@ Display.prototype.changeAlarmStateAndFade = function (state) {
 }
 
 Display.prototype.alarmOn = function (skipFade) {
-  this.alarmCheck.prop('checked', true)
-  this.alarmButton.addClass('active')
+  this.alarmCheck.prop("checked", true)
+  this.alarmButton.addClass("active")
   if (!skipFade) {
-    this.changeAlarmStateAndFade('on')
+    this.changeAlarmStateAndFade("on")
   }
 }
 
 Display.prototype.alarmOff = function (skipFade) {
-  this.alarmCheck.prop('checked', false)
-  this.alarmButton.removeClass('active')
+  this.alarmCheck.prop("checked", false)
+  this.alarmButton.removeClass("active")
 
   if (!skipFade) {
-    this.changeAlarmStateAndFade('off')
+    this.changeAlarmStateAndFade("off")
   }
 }
 
 Display.prototype.selectAll = function () {
-  document.execCommand('selectAll', false, null)
+  document.execCommand("selectAll", false, null)
 }
 
 Display.prototype.deferredSelectAll = function () {
@@ -316,7 +311,7 @@ Display.prototype.deferredSelectAll = function () {
 }
 
 Display.prototype.clearBadge = function () {
-  sendMessage({ action: 'clearBadge' })
+  sendMessage({ action: "clearBadge" })
 }
 
 /// /
@@ -327,11 +322,11 @@ const display = new Display()
 
 // listen for messages from service worker
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
-  if (message.type === 'tick') {
+  if (message.type === "tick") {
     display.setPrimaryTime(message.time)
-  } else if (message.type === 'stateUpdate') {
+  } else if (message.type === "stateUpdate") {
     timerState = message.state
   }
 })
 
-$('.editable').blur()
+$(".editable").blur()

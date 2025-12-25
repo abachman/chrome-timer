@@ -16,7 +16,7 @@
     "lib": "lib"
   },
   "env": {
-		"browser": true
+    "browser": true
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
