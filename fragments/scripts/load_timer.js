@@ -83,6 +83,8 @@ Display.prototype.bindAll = function () {
     sendMessage({ action: 'toggleAlarm', enabled })
     if (self.alarmCheck.is(':checked')) {
       self.alarmOn(false)
+      // Play test sound when enabling alarm
+      sendMessage({ action: 'testAlarm' })
     } else {
       self.alarmOff(false)
     }

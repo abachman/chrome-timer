@@ -279,9 +279,11 @@ async function toggleAlarmSound (enabled) {
 
 // Handle messages from popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  // Handle messages intended for offscreen document
+  // Handle messages intended for offscreen document - let them pass through
   if (message.target === 'offscreen') {
-    return false
+    // Don't handle these messages in the service worker
+    // Return true to allow message to propagate to offscreen document
+    return true
   }
 
   // Handle action messages
@@ -312,6 +314,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     case 'clearBadge':
       clearBadge()
+      break
+
+    case 'testAlarm':
+      // Play test alarm sound (used when toggling alarm on)
+      playAlarm().catch(console.error)
+      sendResponse({ success: true })
       break
   }
 
