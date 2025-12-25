@@ -2,11 +2,10 @@
 
 // Listen for messages from service worker
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.target === "offscreen") {
-    if (message.action === "playAlarm") {
-      playAlarm()
-    }
+  if (message.target === "offscreen" && message.action === "playAlarm") {
+    playAlarm()
   }
+  // NOTE: returning true here is not necessary since we expect no async response
   // return true
 })
 
