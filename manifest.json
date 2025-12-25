@@ -1,15 +1,16 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
 
   "name": "Timer",
   "version": "1.1.0",
   "description": "A clean, simple countown timer with visual and audible alarm.",
 
   "background": {
-    "page": "background.html"
+    "service_worker": "service_worker.js",
+    "type": "module"
   },
 
-  "browser_action": {
+  "action": {
     "default_icon": {
       "19": "icons/19.png",
       "38": "icons/38.png"
@@ -18,17 +19,21 @@
     "default_popup": "fragments/popup.html"
   },
 
-  "permissions": [
-    "notifications"
-  ],
-
+  "permissions": ["notifications", "alarms", "storage", "offscreen"],
+  "host_permissions": [],
   "web_accessible_resources": [
-    "icons/48.png",
-    "assets/wine-glass-alarm.ogg",
-    "assets/glyphicons-halflings.png"
+    {
+      "resources": [
+        "icons/48.png",
+        "assets/wine-glass-alarm.ogg",
+        "assets/glyphicons-halflings.png"
+      ],
+      "matches": ["<all_urls>"]
+    }
   ],
-  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self';",
-
+  "content_security_policy": {
+    "extension": "script-src 'self'; object-src 'self';"
+  },
   "icons": {
     "16": "icons/16.png",
     "48": "icons/48.png",
