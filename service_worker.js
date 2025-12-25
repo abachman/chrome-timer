@@ -114,18 +114,6 @@ async function playAlarm() {
     })
 
     if (!existingClients.length) {
-      /*
-      Error playing alarm: TypeError: Error in invocation of
-      offscreen.createDocument(offscreen.CreateParameters parameters, function
-      callback):
-        Error at parameter 'parameters':
-          Error at property 'reasons':
-            Error at index 0:
-              Value must be one of AUDIO_PLAYBACK, BATTERY_STATUS, BLOBS,
-              CLIPBOARD, DISPLAY_MEDIA, DOM_PARSER, DOM_SCRAPING, GEOLOCATION,
-              IFRAME_SCRIPTING, LOCAL_STORAGE, MATCH_MEDIA, TESTING, USER_MEDIA,
-              WEB_RTC, WORKERS.
-      */
       await chrome.offscreen.createDocument({
         url: "offscreen.html",
         reasons: ["AUDIO_PLAYBACK"],
